@@ -18,34 +18,70 @@ A simple web application that helps non-technical users troubleshoot common comp
 - **AI Model**: Ollama (gemma4:31b-cloud)
 - **Session Storage**: In-memory (dictionary)
 
-## Setup Instructions
+## Quick Start (Running Locally)
 
-1. **Install dependencies**:
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/Jazblue/ai-it-helpdesk.git
+   cd ai-it-helpdesk
+   ```
+
+2. **Install dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
-
-2. **Run the application**:
-   ```bash
-   cd it-helpdesk
-   python app.py
-   ```
-   The app will run on [http://localhost:5000](http://localhost:5000)
 
 3. **Ensure Ollama is running**:
    ```bash
    ollama serve
    ```
-   This needs to be running on port 11434
+   Make sure you have the `gemma4:31b-cloud` model installed (or change the model in `app.py`).
+
+4. **Run the application**:
+   ```bash
+   python app.py
+   ```
+   The app will be available on [http://localhost:5000](http://localhost:5000).
+
+5. **Open your browser** and navigate to `http://localhost:5000`.
+
+## Publishing to GitHub
+
+1. **Initialize Git repository** (if cloning from existing):
+   ```bash
+   git init
+   ```
+
+2. **Add files and commit**:
+   ```bash
+   git add .
+   git commit -m "Initial commit"
+   ```
+
+3. **Create GitHub repository** (via GitHub CLI):
+   ```bash
+   gh repo create Jazblue/ai-it-helpdesk --public
+   ```
+
+4. **Push to GitHub**:
+   ```bash
+   git push -u origin master
+   ```
+
+5. **Enable GitHub Pages** (optional, for public hosting):
+   ```bash
+   gh repo edit --enable-pages
+   ```
+   After a few minutes, your site will be live at `https://jazblue.github.io/ai-it-helpdesk/`.
 
 ## Environment Variables (Optional)
 
 - `OLLAMA_URL`: Base URL for Ollama API (default: http://127.0.0.1:11434/api/chat)
 - `OLLAMA_MODEL`: Model name to use (default: gemma4:31b-cloud)
 
-## AI Prompt Engineering
+## Prompt Engineering
 
-The AI assistant is guided by a YAML prompt template that enforces:
+The AI assistant is guided by a YAML prompt template (`prompts/it_helpdesk.yaml`) that enforces:
 - Beginner-friendly explanations
 - One question at a time
 - Clear tracking of troubleshooting steps
@@ -64,7 +100,7 @@ The AI assistant is guided by a YAML prompt template that enforces:
 │   └── script.js           # Chat functionality
 ├── prompts/                # Prompt templates
 │   └── it_helpdesk.yaml    # AI assistant prompt
-└── requirements.txt       # Python dependencies
+└── requirements.txt        # Python dependencies
 ```
 
 ## Testing
