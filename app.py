@@ -14,19 +14,40 @@ sessions = {}
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434/api/chat")
 DEFAULT_MODEL = os.environ.get("OLLAMA_MODEL", "gemma4:31b-cloud")
 
-# Load prompt templates
-def load_prompt_template():
+# Load prompt templates and config
+def load_prompt_config():
     prompt_path = os.path.join(os.path.dirname(__file__), "prompts", "it_helpdesk.yaml")
-    with open(prompt_path, "r") as f:
-        return yaml.safe_load(f)
+    try:
+        with open(prompt_path, "r") as f:
+            return yaml.safe_load(f)
+    except (OSError, yaml.YAMLError):
+        return {}
+
+# Fallback keywords if the config file is missing or incomplete
+FALLBACK_END_SESSION_KEYWORDS = [
+    "recommend", "escalate", "human support",
+    "cannot diagnose", "unable to diagnose", "end of this session",
+]
+
+
+def get_end_session_keywords(prompt_config):
+    keywords = prompt_config.get("end_session_keywords") if prompt_config else None
+    if not isinstance(keywords, list) or not keywords:
+        return FALLBACK_END_SESSION_KEYWORDS
+    return [k.lower() for k in keywords if isinstance(k, str)]
 
 # Initialize session with prompt template
+PROMPT_CONFIG = load_prompt_config()
+
+
 def init_session(session_id):
-    prompt_template = load_prompt_template()
+    config = PROMPT_CONFIG
+    system_prompt = config.get("system") or "You are an AI IT Helpdesk Assistant."
+    initial_message = config.get("initial_message") or "Please describe your IT problem."
     sessions[session_id] = {
         "history": [
-            {"role": "system", "content": prompt_template["system"]},
-            {"role": "assistant", "content": prompt_template["initial_message"]}
+            {"role": "system", "content": system_prompt},
+            {"role": "assistant", "content": initial_message}
         ],
         "steps_taken": [],
         "user_info": {}
@@ -117,7 +138,7 @@ def chat():
     session["history"].append({"role": "assistant", "content": ai_response})
 
     # Check if session should end (AI suggests escalation or problem seems resolved)
-    end_session = any(keyword in ai_response.lower() for keyword in ["recommend", "escalate", "human support", "cannot diagnose", "unable to diagnose", "end of this session"])
+    end_session = any(keyword in ai_response.lower() for keyword in get_end_session_keywords(PROMPT_CONFIG))
 
     # Generate report if session is ending
     report = None
